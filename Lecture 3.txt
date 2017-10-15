@@ -1,0 +1,168 @@
+An * opcode * is a word that represents a machine language instruction (e.g. ADD, SUB, JR)
+An * assembly language * is a language for writing machine language program using opcodes instead of bits 
+An * assembler * is a program that translates assembly language to machine language 
+A  * label * translates assembly language to machine language 
+A  * symbol table * is a map from label names to addresses 
+A  * relocation * is the process of adjusting addresses in machine language code so it can be loaded at a 
+different memory address 
+An * object file * contains: 
+  - machine language code 
+  - metadata describing what the labels used to be 
+   * linking * is the process of combining object files into one program/library/object file 
+
+E.g. 
+  Find absolute value of $1 
+  <!-- MIPS !-->                             <!-- MIPS/Scala !-->
+  SLT (2, 1, 0)                              val label = new Label("l")
+  BEQ (2, 0, 1)                              SLT (2, 1, 0)
+  SUB (1, 0, 1)                              beq (2, 0, label) // this is a different instruction
+  JR  (31)                                   SUB (1, 0, 1)
+                                             Define (label)
+                                             JR  (31))
+
+
+
+
+How do we eliminate labels? 
+  - We do two pass-through of the code 
+    * First pass to find all the address of define 
+    * Second to resolve all the label lookup 
+
+
+
+E.g. Calling a precedure 
+  
+  0       ... // main program 
+  4       LIS (7)
+  8       100
+  12      JALR(7)
+  16      ... 
+  .
+  .
+  .
+  100     ... // precedure 
+          ... 
+          JR (31)
+
+
+However, this is not very modular. In this case, we can use labels. 
+
+  0       ... // main program 
+  4       LIS (7)
+  8       USE (procedure)
+  12      JALR(7)
+  16      ... 
+  .
+  .
+  .
+  Define (procedure)
+  100     ... // precedure 
+          ... 
+          JR (31)
+
+
+assembly lang. 
+   _                       _                            _
+  |_|   -------->         |_|        --------------->  |_|
+  a.s   assembler         a.o
+   ^                       ^
+   assembly file           object file 
+
+
+file_1.asm
+<!-- MIPS-A !-->
+  Define (a):
+    lis $1                   
+    use(b)
+    jalr $1
+    jr $31
+
+  Define (b): 
+    jr $31 
+
+
+After assembling 
+<!-- MIPS !-->
+  0   lis $1
+  4   16
+  8   jalr $1
+  12  jr $31
+  16  jr $31
+metadata:
+  export label a = 0
+  export label b = 16
+  address at 4 is b
+<!------------->
+
+
+file_2.asm
+<!-- MIPS-A !-->
+lis $1
+use (a)
+jalr $1
+jr $31
+<!------------->
+
+After assembling (object file)
+<!-- MIPS !-->
+  0  lis $1
+  4   <?> 0             <- we do not know what to put at this line at this point 
+  8  jalr $1 
+  12 jr $31
+metadata:
+  use imported label a at 4
+<!------------->
+
+
+
+
+Then we link file_1.o and file_2.o 
+<!-- MIPS !-->
+0     lis $1
+4      ?
+8     jalr $1
+12    jr $31
+16    lis $1 
+20     16 
+24    jalr $1
+28    jr $31
+32    jr $31
+
+
+
+But observe that address at 4 and 20 are wrong, since now we have combined two files together 
+Therefore, we need to perform * relocation *
+
+file_1.asm
+<!-- MIPS !-->
+  0   lis $1
+  4   16
+  8   jalr $1
+  12  jr $31
+  16  jr $31
+metadata:
+  export label a = 16
+  export label b = 32
+  address at 20 is b
+<!------------->
+
+file_1.o + file_2.o
+<!-- MIPS !-->
+0     lis $1
+4      16
+8     jalr $1
+12    jr $31
+16    lis $1 
+20     32
+24    jalr $1
+28    jr $31
+32    jr $31
+
+
+
+Note that linker only works with machine language file rather than assembly file
+
+
+
+
+
