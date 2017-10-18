@@ -102,5 +102,80 @@ def twice(fun: Int=>Int): Int=>Int = {
 increase = twice(increase)
 
 increase(5) // 9
+
+increase = { x => x + increment } // compile-error 
 ```
 
+## A `Free Variable` in an expression is a variable that is not defined within the expression 
+
+E.g. 
+- `x` is free in `x + increment`
+- `x` is not free in `{ x => x + increment }`
+
+
+## An expression is `closed` if it contains no free variable 
+
+``` Scala
+def increaseBy(increment: Int): Int=>Int = { x => x + increment }
+
+increase = increaseBy(3)
+
+increase(5) // 8
+
+List(increaseBy(1), increaseBy(2), increaseBy(3))
+    .map(fun => fun(5))
+ // List(6, 7, 8)
+
+```
+
+## A `closure` is a pair of 
+- the code of a function body 
+    - the code label 
+- and `environment` for the free variables in the function body 
+    - frame at enclosing proceure 
+    - which is basically the static link 
+
+``` Scala 
+var functionValue: (Int=>Int)
+def constuctor(n: Int): (Int=>Int) = {
+    var b = a * 2
+    def procedure(c: Int): Int = {a + b + c}
+    procedure // closure creation 
+}
+
+functionValue = constructor(42)
+//              ^~~~~~~~~~~~~~
+//              Call(...), `constructor` is a Procedure(...)
+functionValue(5)
+// ^~~~~~~~~~~~~
+// CallClosure(...)
+// essentially we are calling constructor(42)(5)
+// target is Code that eventually evaluates to a Closure 
+//           ^~~~
+//           code that reads variable functionValue()
+```
+
+`functionValue` must store:
+- label at procedure code 
+- static link 
+
+## At closure creation, compute static link just like in a normal call 
+## At closure call, passenvironment from closure as the static link 
+
+
+## Question: What is the _Extend_ of `a` and `b` ? 
+- begins at the beginning of the `constructor`
+- we *CANNOT* allocate frame of `constructor` on the stack 
+    - because we need to access `constructor`'s local vars after the call returns 
+- ends when all copies of the closure values have been lost or overwritten
+    - we can just heap in this case 
+
+## A `heap` is a data structure that manages memory, so it can be allocated / freed at any time 
+(Assignment 11: implementing a real heap)
+
+(Assignment 6: simplified heap, allocates and never frees )
+
+## Question: Which procedure on heap? 
+- a closure can access frames of all procedures in which it is nested 
+    - that means these frames must be on heap 
+- frame of a procedure that contains p (a procedure) anywhere inside it must be on heap if we ever make closure out of p
