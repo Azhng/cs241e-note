@@ -179,3 +179,42 @@ functionValue(5)
 - a closure can access frames of all procedures in which it is nested 
     - that means these frames must be on heap 
 - frame of a procedure that contains p (a procedure) anywhere inside it must be on heap if we ever make closure out of p
+
+
+// ignore this 
+``` Scala
+// scala version
+def increaseBy2(increment: Int) :(Int)=>Int = {
+    def procedure(x: Int) = { x + increment }
+    procedure
+}
+
+def main(a: Int, b: Int) = (increaseBy2(a))(b)
+
+main(3, 5) // 8
+
+// lacs version 
+def v(variable: Variable): Code = read(Reg.result, variable)
+
+val increment = new Variable("inrement")
+val increaseBy = new Procedure("increaseBy", Seq(increment), Seq())
+
+val x = new Variable("x")
+val procedure = new Procedure("procedure", Seq(x), Seq(), Some(increaseBy))
+// ^~~~~~~
+// this is nested within the `increaseBy` procedure 
+
+procedure.code  = binOp(v(x), plus, v(increment))
+increaseBy.code = Closure(procedure)
+
+val main = new Procedure("main", Seq(a, b), Seq())
+val parameter = new Variable("parameter")
+main.code = CallClosure(call(increaseBy, v(a)), Seq(v(b),           Seq(parameter))
+//                                                  ^~~             ^~~~~~~~~~~~~~
+//                                        closure call param      means closure takes one param
+
+val machineCode = compilerA6(Seq(main, increaseBy, procedure))
+
+val endState = A1.loadAndRun(machineCode.words, Word(encodeSigned(3)), Word(encodeSigned(5)))
+// Reg(3) should be 8 
+```
