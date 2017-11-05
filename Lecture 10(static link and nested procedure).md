@@ -160,7 +160,7 @@ functionValue(5)
 - static link 
 
 ## At closure creation, compute static link just like in a normal call 
-## At closure call, passenvironment from closure as the static link 
+## At closure call, pass the environment from closure as the static link 
 
 
 ## Question: What is the _Extend_ of `a` and `b` ? 
