@@ -128,23 +128,23 @@ w, x, y, z    ∈ Σ⋆
 
 
 ``` Psuedo Code 
-parse(α, x) =  // does α =>⋆ x ?
+parse(α, x): Boolean or Option[Seq[Tree]] =  // does α =>⋆ x ?
 {
     if(α.isEmpty) {
-        if(x.isEmpty) return true
-        else return false 
+        if(x.isEmpty) return true                                                                  // Seq()
+        else return false
     } else if(α == aβ) {
-        if(x@(a :: z) && parse(β, z)) return true // a is the terminal term of α, then parse(β, z)
+        if(x@(a :: z) && parse(β, z)) return true // a is the terminal term of α, then parse(β, z) // a +: parse(β, z)   
         else return false 
-    } else if(α == A) {
-        foreach(A->γ ∈ P) {
-            if(parse(γ, x)) return true 
+    } else if(α == A) {                                                                            //     A 
+        foreach(A->γ ∈ P) {                                                                        //    /|\
+            if(parse(γ, x)) return true                                                            // parse(γ, x)
         }
         return false 
-    } else { // α = Aβ, β is empty
-        foreach(split x = x1 x2) { // split x in all possible ways 
-            if(parse(A, x1) && parse(β, x2)) return true
-        }
+    } else { // α = Aβ, β is nonempty
+        foreach(split x = x1 x2) { // split x in all possible ways                               // parse(A, x1) ++ parse(β, x2)
+            if(parse(A, x1) && parse(β, x2)) return true                                           
+        }                                                                                          
         return false 
     }
 }
@@ -206,7 +206,7 @@ p( expr =>⋆ ID + ID )
 
 ## Memoization table: 
 ``` Scala
-val memo = Map[(Seq[Symbol], Int, Int), ...]
+val memo = Map[(Seq[Symbol], Int, Int), Option[Seq[Tree]]]
 //              alpha       from   length
 // 1. Whenever parse/recur returns, save the return value in memo table 
 // 2. At beginning of recur, check whether memo table already has result 
@@ -219,6 +219,61 @@ val memo = Map[(Seq[Symbol], Int, Int), ...]
 
 
 ### To instead of return true/false, we can use the memorization table to implement construction of parse tree 
+
+
+## Other parsing algorithm (for context)
+- CYK 
+  - O(|w|^3) time O(|w|^2) space 
+  - 0.5 week
+  - works with all grammar
+  - no correct prefix property 
+- Earley
+  - O(|w|^3) for ambigious grammar 
+  - O(|w|^2) for unambigious grammar
+  - O(|w|)   for most of LR(K) grammar
+  - 1.5 weeks 
+  - correct prefix property 
+- LR(1) / LR(K)
+  - O(|w|) time / space 
+  - 3 weeks in CS 444
+  - works with unambigious practical grammars
+  - correct prefix property 
+- LL(1) / LL(K)
+  - 1.5 weeks 
+  - O(|w|) time / space 
+  - few practical grammars 
+  - cannot build left-associative parse tree 
+    - e.g. `3 - 2 - 1` cannot be parsed 
+  - correct prefix property 
+
+### Definition: 
+- Let `w` = `xaz` ∉ `L` be some incorrect string, 
+- ∃`y` s.t. `x`, `y` ∈ `L` is a valid input 
+- ∀`v` `x``a``v` ∉ `L`
+- A parser has the __correct prefix property__ if it rejects the input when it encounters `a` 
+
+
+## Compiler:
+
+```
+Sequence of chars -> |scanner A7| -> |parser| -> | ??? |  -> |code generation| -> machine language
+                                  ^           ^            ^
+                                  tokens     parse tree    code tree 
+```
+
+### `???` - is the __context-sensitive analysis__ or __semantic analysis__ (A9)
+- rejects programs that satisfy grammar but are still wrong 
+- computes information needed to generate code 
+
+### In Lacs 
+- need two things 
+  1. resolving name 
+    - map each `ID` to a specific variable or procedure 
+    - build symbol table for each scope (procedure)
+      - detect undelcared variables / names 
+      - detect duplicate 
+  2. compute and check types 
+
 
 
 [tag1]: https://imagehosting-50cd6.firebaseapp.com/l13tag1.JPG "tag1"
