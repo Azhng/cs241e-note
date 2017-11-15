@@ -71,6 +71,22 @@ ___________
 Γ ⊢ E'(E) :
 
 
+            ______   _______   ______     
+all name in vardef,  vardef',  defdef are distinct
+______   _______   ______                 ______  _______  ______
+vardef,  vardef'   defdef ⊢ E: γ    ∀i Γ ⊢ vardef, vardef', defdef ⊢ defdef; 
+___________________________________
+            ______           ______   ______
+Γ ⊢ def ID (vardef) : γ =  { vardef'  defdef E }
+
+
+
+   ______
+∀i defdef ⊢ defdef: 
+___________________________________
+    ______
+∅ ⊢ defdef
+{} 
 ```
 
 
