@@ -117,6 +117,7 @@ def free(tofree) = {
             // merge with previous 
             if( (previous + size(previous)) == tofree && previous > heapSize ) {
                 setSize(previous, size(previous) + size(tofree))
+                setNext(previous, next(tofree))
             } else {
                 setNext(previous, tofree)
             }
@@ -128,6 +129,75 @@ def free(tofree) = {
 }
 
 ```
+
+
+Efficiency:
+- alloc O(|heap|)
+- free: O(|heap|)
+- it could be O(1) with more bookkeeping
+
+
+However, we still have an issue: *Memory Fragmentation*
+```
+a = malloc(8)
+b = malloc(8)
+c = malloc(8)
+free(a)
+free(c)
+d = malloc(12)
+
+heap:
+ _____
+|  a  | <- 8: free 
+|  b  | <- 8: used 
+|  c  | <- 8: free
+```
+
+### Definition: a heap is *fragmented* when free space is split into many small pieces 
+
+## Compaction (defragmentation) 
+- copy all used blocks together (to beginning of heap) 
+- updates all pointers in used block (in used blocks) to the new location 
+- need to sound types to identify pointers in memory 
+- in Lacs 
+    - `Variable` has a `isPointer` field 
+    - in `Chunk`s, put pointers first, record number of pointers 
+```
+|       size         |
+| number of pointers |
+|       pointers     |
+|        ...         |
+|  non-pointers      |
+```
+
+
+Recall liveness of variable, we can define similar thing for memory block: 
+
+### Definition: a block is _live_ if it will be accessed in the future, it is _dead_ if it will not be accessed in the future 
+
+### Definition: a block is _reachable_ if:
+- its address is stored in the stack (or in a register)
+- or 
+- its address is stored in some other reachable blocks in the heap 
+
+
+- If a block is live => it is reachable, 
+- then by contrapositiv :
+    - unreachable => dead 
+
+- Approximation: free unreachable blocks
+
+ 
+
+
+
+
+
+
+
+
+
+
 
 
 
