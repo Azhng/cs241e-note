@@ -88,7 +88,6 @@ def malloc(wanted) = {
                 setNext(previous, next(current))
             }
 
-            setNext(previous, next(current))
             current            
         }
     }
