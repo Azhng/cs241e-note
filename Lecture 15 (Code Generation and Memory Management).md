@@ -114,7 +114,7 @@ def free(tofree) = {
 
 
             // merge with previous 
-            if( (previous + size(previous)) == tofree && previous > heapSize ) {
+            if( (previous + size(previous)) == tofree && previous > heapStart ) {
                 setSize(previous, size(previous) + size(tofree))
                 setNext(previous, next(tofree))
             } else {
