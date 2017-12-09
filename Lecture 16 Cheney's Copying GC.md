@@ -101,5 +101,14 @@ def copy(block) = {
 ```
 
 
+- Allocation: O(1)
+- GC: O(|reachable space|)
+- Cost per allocation depends on how full heap is 
 
-
+## Generational Garbage Collection: 
+- Observation: most memory lives long or dies young 
+- idea:
+    - having more than two semispaces 
+    - smaller semispaces for blocks that dies young, collect frequently 
+    - larger semispaces for blocks that lives long, collect infrequently 
+    - we need to keep track of pointers between different semispaces
