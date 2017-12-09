@@ -85,10 +85,9 @@ def malloc(wanted) = {
                 setNext(newBlock, next(current))
                 setNext(previous, newBlock)
             } else { 
-
+                setNext(previous, next(current))
             }
 
-            setNext(previous, next(current))
             current            
         }
     }
